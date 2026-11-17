@@ -1,2 +1,2 @@
-export const SUPABASE_URL = "ISI_URL_SUPABASE_KAMU";
-export const SUPABASE_ANON_KEY = "ISI_ANON_PUBLIC_KEY_KAMU";
+export const SUPABASE_URL = "https://bnxohuknseuxvklaywec.supabase.co";
+export const SUPABASE_ANON_KEY = "sb_publishable_FIfjskJKQP6KU32aSabMgA_0fGeMbmd";
