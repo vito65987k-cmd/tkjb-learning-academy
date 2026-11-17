@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#071326" />
+  <title>TKJ B Learning Academy</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="authView" class="auth-shell">
+    <section class="auth-brand">
+      <div class="brand-mark">⌘</div>
+      <p class="eyebrow">LEARN • PRACTICE • GROW</p>
+      <h1>TKJ B<br><span>Learning Academy</span></h1>
+      <p class="muted">Belajar bertahap, raih masa depan.</p>
+      <div class="auth-orbit"><div class="orbit-core">TKJ</div><i>01</i><b>02</b><em>03</em></div>
+      <p class="small muted">Jaringan • Coding • Linux • Cybersecurity</p>
+    </section>
+    <section class="auth-panel">
+      <div class="auth-tabs">
+        <button class="tab active" id="loginTab">Masuk</button>
+        <button class="tab" id="registerTab">Daftar akun</button>
+      </div>
+      <form id="authForm">
+        <h2 id="authTitle">Selamat datang kembali!</h2>
+        <p class="muted" id="authSubtitle">Masuk untuk melanjutkan perjalanan belajarmu.</p>
+        <label id="nameWrap" class="hidden">Nama lengkap<input id="fullName" autocomplete="name" placeholder="Nama kamu"></label>
+        <label>Email<input id="email" type="email" required autocomplete="email" placeholder="nama@email.com"></label>
+        <label>Password<input id="password" type="password" required minlength="6" autocomplete="current-password" placeholder="Minimal 6 karakter"></label>
+        <button class="primary full" id="authSubmit">Masuk ke dashboard <span>→</span></button>
+        <p class="form-message" id="authMessage" role="status"></p>
+      </form>
+      <p class="tiny muted">Akun disimpan melalui Supabase setelah konfigurasi database selesai.</p>
+    </section>
+  </div>
+
+  <div id="appView" class="app hidden">
+    <aside class="sidebar" id="sidebar">
+      <div class="side-brand"><div class="brand-mark small-mark">⌘</div><div><b>TKJ B</b><small>LEARNING ACADEMY</small></div></div>
+      <div class="side-label">MENU UTAMA</div>
+      <nav>
+        <button class="nav-item active" data-page="dashboard">▦ <span>Dashboard</span></button>
+        <button class="nav-item" data-page="schedule">▤ <span>Jadwal belajar</span></button>
+        <button class="nav-item" data-page="courses">◈ <span>Kelas & materi</span></button>
+        <button class="nav-item" data-page="practice">✎ <span>Latihan & kuis</span></button>
+        <button class="nav-item" data-page="notes">▧ <span>Catatan saya</span></button>
+        <button class="nav-item" data-page="progress">↗ <span>Progres belajar</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="help-card"><b>Terus berkembang!</b><p>Belajar sedikit demi sedikit, setiap hari.</p><span>✦</span></div>
+        <button id="logoutBtn" class="nav-item logout">↪ <span>Keluar akun</span></button>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <button class="menu-toggle" id="menuToggle">☰</button>
+        <div><span class="eyebrow">RUANG BELAJAR DIGITAL</span><h2 id="pageHeading">Dashboard</h2></div>
+        <div class="user-chip"><div class="avatar" id="avatar">R</div><div><b id="userName">Pelajar TKJ</b><small>Kelas 10 TKJ B</small></div></div>
+      </header>
+      <section id="pageContent"></section>
+      <footer>© 2026 TKJ B Learning Academy <span>Belajar Hari Ini, Untuk Masa Depan Nanti.</span></footer>
+    </main>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
