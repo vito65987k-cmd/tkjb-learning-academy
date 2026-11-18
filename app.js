@@ -1,3 +1,4 @@
+import { COURSES } from "./materi.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -35,7 +36,7 @@ const SCHEDULE = [
   ["Jumat", "Python Pemula • 40 menit"],
   ["Sabtu", "Linux / Termux • 40 menit"],
   ["Minggu", "Cybersecurity Pemula • 40 menit (hari fleksibel)"],];
-const COURSES = [
+const OLD_COURSES = [
   { id: "net", title: "Jaringan Dasar", desc: "Konsep dasar jaringan komputer.", lessons: ["Apa itu jaringan komputer", "Model OSI & TCP/IP", "Alamat IP & subnetting dasar"] },
   { id: "code", title: "Dasar Coding", desc: "Logika pemrograman untuk pemula.", lessons: ["Variabel & tipe data", "Percabangan & perulangan", "Fungsi"] },
   { id: "linux", title: "Linux", desc: "Mengenal sistem operasi Linux.", lessons: ["Struktur direktori", "Perintah dasar terminal", "Hak akses file"] },
@@ -334,3 +335,46 @@ function scheduleGuide() {
       ${rules.map((r, i) => `<div class="x-row"><span><b>${i + 1}.</b> ${r}</span></div>`).join("")}
     </div>`;
 }
+
+let courseId = null;
+let lessonIdx = null;
+
+views.courses = function () {
+  const done = (cid, i) => progress[`lesson:${cid}:${i}`];
+  if (!courseId) {
+    return `<div class="x-grid">${COURSES.map((c) => {
+      const n = c.lessons.filter((_, i) => done(c.id, i)).length;
+      return `<div class="x-card"><h3>${c.title}</h3><p class="muted">${c.desc}</p>
+        <small class="muted">${c.lessons.length ? c.lessons.length + " materi • " + n + " selesai" : "Materi segera hadir"}</small>
+        <div class="x-bar"><i style="width:${pct(n, c.lessons.length)}%"></i></div>
+        <p><button class="x-btn" data-course="${c.id}">Buka kelas</button></p></div>`;
+    }).join("")}</div>`;
+  }
+  const c = COURSES.find((x) => x.id === courseId);
+  if (lessonIdx === null) {
+    return `<p><button class="x-btn x-ghost" data-back="list">← Semua kelas</button></p>
+      <div class="x-card"><h3>${c.title}</h3><p class="muted">${c.desc}</p>
+        <b>Tujuan pembelajaran</b>
+        ${c.goals.map((g) => `<div class="x-row"><span>• ${g}</span></div>`).join("")}</div>
+      <div class="x-card" style="margin-top:14px"><h3>Daftar materi</h3>
+        ${c.lessons.length ? c.lessons.map((l, i) => `<div class="x-row"><span>${i + 1}. ${l.title}${done(c.id, i) ? " ✔" : ""}</span><button class="x-btn x-ghost" data-open="${i}">Baca</button></div>`).join("") : `<p class="muted">Materi untuk kelas ini segera hadir.</p>`}</div>`;
+  }
+  const l = c.lessons[lessonIdx];
+  const last = lessonIdx === c.lessons.length - 1;
+  return `<p><button class="x-btn x-ghost" data-back="course">← ${c.title}</button></p>
+    <div class="x-card"><small class="muted">Materi ${lessonIdx + 1} dari ${c.lessons.length}</small><h3>${l.title}</h3>
+      ${l.body.map((p) => `<p>${p}</p>`).join("")}</div>
+    <div class="x-card" style="margin-top:14px"><b>Contoh di dunia TKJ</b><p>${l.example}</p></div>
+    <div class="x-card" style="margin-top:14px"><b>Praktik</b><p>${l.practice}</p></div>
+    <div class="x-card" style="margin-top:14px"><b>Kesimpulan</b><p>${l.summary}</p>
+      <label class="x-check"><input type="checkbox" data-lesson="${c.id}:${lessonIdx}" ${done(c.id, lessonIdx) ? "checked" : ""}> <span>Tandai selesai</span></label></div>
+    <p style="margin-top:14px">${lessonIdx > 0 ? `<button class="x-btn x-ghost" data-open="${lessonIdx - 1}">← Sebelumnya</button> ` : ""}${!last ? `<button class="x-btn" data-open="${lessonIdx + 1}">Berikutnya →</button>` : ""}</p>`;
+};
+
+$("#pageContent").addEventListener("click", (e) => {
+  const t = e.target;
+  if (t.dataset.course) { courseId = t.dataset.course; lessonIdx = null; go("courses"); }
+  else if (t.dataset.open !== undefined) { lessonIdx = +t.dataset.open; go("courses"); }
+  else if (t.dataset.back === "course") { lessonIdx = null; go("courses"); }
+  else if (t.dataset.back === "list") { courseId = null; lessonIdx = null; go("courses"); }
+});
