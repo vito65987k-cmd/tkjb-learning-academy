@@ -267,6 +267,7 @@ function go(p) {
   $("#pageContent").innerHTML = views[p]();
   $("#sidebar").classList.remove("open");
   window.scrollTo(0, 0);
+  if (p === "schedule") $("#pageContent").insertAdjacentHTML("beforeend", scheduleGuide());
 }
 
 // ---------- Event ----------
