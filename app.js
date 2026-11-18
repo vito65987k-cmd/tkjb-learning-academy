@@ -28,10 +28,13 @@ const useDb = !!sb;
 
 // ---------- Data materi (edit sesuai kebutuhan) ----------
 const SCHEDULE = [
-  ["Senin", "Dasar Jaringan Komputer"], ["Selasa", "Dasar Pemrograman"], ["Rabu", "Linux & Command Line"],
-  ["Kamis", "Perangkat Keras & Troubleshooting"], ["Jumat", "Keamanan Siber Dasar"],
-  ["Sabtu", "Latihan & Proyek Mini"], ["Minggu", "Review & Istirahat"],
-];
+["Senin", "Dasar Jaringan Komputer • 40 menit"],
+  ["Selasa", "Bahasa Inggris Pemula • 50 menit"],
+  ["Rabu", "Cisco Networking Academy • 40 menit"],
+  ["Kamis", "Bahasa Jepang Pemula • 50 menit"],
+  ["Jumat", "Python Pemula • 40 menit"],
+  ["Sabtu", "Linux / Termux • 40 menit"],
+  ["Minggu", "Cybersecurity Pemula • 40 menit (hari fleksibel)"],];
 const COURSES = [
   { id: "net", title: "Jaringan Dasar", desc: "Konsep dasar jaringan komputer.", lessons: ["Apa itu jaringan komputer", "Model OSI & TCP/IP", "Alamat IP & subnetting dasar"] },
   { id: "code", title: "Dasar Coding", desc: "Logika pemrograman untuk pemula.", lessons: ["Variabel & tipe data", "Percabangan & perulangan", "Fungsi"] },
