@@ -314,3 +314,22 @@ $("#pageContent").addEventListener("change", async (e) => {
     }
   } catch (e) { console.error(e); }
 })();
+
+function scheduleGuide() {
+  const block = (title, sub, items, total) => `
+    <div class="x-card"><h3>${title}</h3><small class="muted">${sub}</small>
+      ${items.map(([n, m]) => `<div style="margin-top:12px"><div class="x-row" style="border:0;padding:0"><span>${n}</span><b>${m} menit</b></div><div class="x-bar"><i style="width:${Math.round((m / total) * 100)}%"></i></div></div>`).join("")}
+    </div>`;
+  const umum = [["Mencatat materi", 10], ["Praktik / latihan", 15], ["Membaca materi", 5], ["Memahami ulang dan menjelaskan", 10]];
+  const bahasa = [["Mencatat materi", 10], ["Menonton video", 10], ["Praktik / latihan", 15], ["Membaca materi", 5], ["Memahami ulang dan menjelaskan", 10]];
+  const rules = ["Tugas sekolah tetap menjadi prioritas utama.", "Jika satu hari terlewat, lanjutkan ke hari berikutnya.", "Minggu adalah hari fleksibel untuk mengejar materi.", "Konsisten lebih penting daripada sempurna."];
+  return `
+    <h3 style="margin:22px 0 12px">Panduan dan aturan belajar</h3>
+    <div class="x-grid">
+      ${block("Waktu belajar umum", "Untuk sesi 40 menit", umum, 40)}
+      ${block("Bahasa Inggris dan Jepang", "Untuk sesi 50 menit", bahasa, 50)}
+    </div>
+    <div class="x-card"><h3>Aturan belajar</h3>
+      ${rules.map((r, i) => `<div class="x-row"><span><b>${i + 1}.</b> ${r}</span></div>`).join("")}
+    </div>`;
+}
