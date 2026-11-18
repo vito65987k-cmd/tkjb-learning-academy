@@ -1,3 +1,4 @@
+import { CURRICULUM } from "./kurikulum.js";
 import { COURSES } from "./materi.js";
 import { SUPABASE_URL, SUPABASE_ANON_KEY } from "./config.js";
 
@@ -377,4 +378,108 @@ $("#pageContent").addEventListener("click", (e) => {
   else if (t.dataset.open !== undefined) { lessonIdx = +t.dataset.open; go("courses"); }
   else if (t.dataset.back === "course") { lessonIdx = null; go("courses"); }
   else if (t.dataset.back === "list") { courseId = null; lessonIdx = null; go("courses"); }
+});
+
+const flatCourses = views.courses;
+const nv = { level: null, bab: null, lesson: null, mode: null, result: null };
+const nvReset = () => { nv.level = null; nv.bab = null; nv.lesson = null; nv.mode = null; nv.result = null; };
+
+views.courses = function () {
+  const cur = courseId && CURRICULUM[courseId];
+  if (!cur) return flatCourses();
+  const course = COURSES.find((c) => c.id === courseId);
+  const lvl = cur.levels.find((l) => l.id === nv.level);
+  const bb = lvl && lvl.babs.find((b) => b.id === nv.bab);
+  const key = (l) => `${courseId}:${l.legacy !== undefined ? l.legacy : l.id}`;
+  const isDone = (l) => progress[`lesson:${key(l)}`];
+  const lessonsOf = (lv) => lv.babs.flatMap((b) => b.lessons);
+  const best = (k) => progress[k];
+  const back = (label) => `<p><button class="x-btn x-ghost" data-n="up">← ${label}</button></p>`;
+
+  if (!lvl) {
+    return `<p><button class="x-btn x-ghost" data-back="list">← Semua kelas</button></p>
+      <div class="x-card"><h3>${course.title}</h3><p class="muted">${course.desc}</p></div>
+      ${cur.levels.map((lv) => {
+        const all = lessonsOf(lv), n = all.filter(isDone).length;
+        const ex = best(`exam:${courseId}:${lv.id}`);
+        return `<div class="x-card" style="margin-top:14px"><h3>${lv.title}</h3><p class="muted">${lv.goal}</p>
+          <small class="muted">${lv.babs.length} bab • ${all.length ? n + "/" + all.length + " pelajaran" : "materi segera hadir"}${ex != null ? " • ujian " + ex + "%" + (ex >= cur.passScore ? " ✔" : "") : ""}</small>
+          <div class="x-bar"><i style="width:${pct(n, all.length)}%"></i></div>
+          <p><button class="x-btn" data-n="lv:${lv.id}">Buka tingkat</button></p></div>`;
+      }).join("")}`;
+  }
+
+  if (nv.mode) {
+    const isExam = nv.mode === "exam";
+    const qs = isExam ? lvl.exam : bb.quiz;
+    const title = isExam ? "Ujian akhir – " + lvl.title : "Kuis bab " + bb.id + " – " + bb.title;
+    const r = nv.result;
+    if (!r) {
+      return back("Kembali") + `<div class="x-card"><h3>${title}</h3><small class="muted">${qs.length} soal • nilai lulus ${cur.passScore}%</small>
+        ${qs.map((q, i) => `<div style="margin:14px 0"><b>${i + 1}. ${q.q}</b>${q.o.map((o, j) => `<label class="x-opt"><input type="radio" name="nq${i}" value="${j}"> <span>${o}</span></label>`).join("")}</div>`).join("")}
+        <button class="x-btn" data-n="submit">Periksa jawaban</button></div>`;
+    }
+    return back("Selesai") + `<div class="x-card"><h3>${title}</h3><div class="x-big">${r.score}%</div>
+      <p class="${r.score >= cur.passScore ? "x-ok" : "x-bad"}">${r.score >= cur.passScore ? "Lulus ✔" : "Belum lulus. Pelajari lagi lalu coba ulang."}</p>
+      ${qs.map((q, i) => `<div class="x-row"><span>${i + 1}. ${q.q}<br><small class="${r.ok[i] ? "x-ok" : "x-bad"}">${r.ok[i] ? "Benar ✔" : "Jawaban benar: " + q.o[q.a]}</small></span></div>`).join("")}
+      <p><button class="x-btn" data-n="retry">Ulangi</button></p></div>`;
+  }
+
+  if (nv.lesson) {
+    const idx = bb.lessons.findIndex((l) => l.id === nv.lesson);
+    const l = bb.lessons[idx];
+    return back(bb.title) + `<div class="x-card"><small class="muted">Pelajaran ${idx + 1} dari ${bb.lessons.length} • Bab ${bb.id}</small><h3>${l.title}</h3>${l.body.map((p) => `<p>${p}</p>`).join("")}</div>
+      <div class="x-card" style="margin-top:14px"><b>Contoh di dunia TKJ</b><p>${l.example}</p></div>
+      <div class="x-card" style="margin-top:14px"><b>Praktik</b><p>${l.practice}</p></div>
+      <div class="x-card" style="margin-top:14px"><b>Kesimpulan</b><p>${l.summary}</p>
+        <label class="x-check"><input type="checkbox" data-lesson="${key(l)}" ${isDone(l) ? "checked" : ""}> <span>Tandai selesai</span></label></div>
+      <p style="margin-top:14px">${idx > 0 ? `<button class="x-btn x-ghost" data-n="ls:${bb.lessons[idx - 1].id}">← Sebelumnya</button> ` : ""}${idx < bb.lessons.length - 1 ? `<button class="x-btn" data-n="ls:${bb.lessons[idx + 1].id}">Berikutnya →</button>` : ""}</p>`;
+  }
+
+  if (bb) {
+    const qb = best(`quiz:${courseId}:${bb.id}`);
+    return back(lvl.title) + `<div class="x-card"><h3>Bab ${bb.id}: ${bb.title}</h3></div>
+      <div class="x-card" style="margin-top:14px"><h3>Pelajaran</h3>
+        ${bb.lessons.length ? bb.lessons.map((l, i) => `<div class="x-row"><span>${i + 1}. ${l.title}${isDone(l) ? " ✔" : ""}</span><button class="x-btn x-ghost" data-n="ls:${l.id}">Baca</button></div>`).join("") : `<p class="muted">Pelajaran untuk bab ini segera hadir.</p>`}</div>
+      <div class="x-card" style="margin-top:14px"><h3>Kuis bab</h3>
+        ${bb.quiz.length ? `<small class="muted">${bb.quiz.length} soal${qb != null ? " • skor terbaik " + qb + "%" : ""}</small><p><button class="x-btn" data-n="quiz:${bb.id}">Mulai kuis</button></p>` : `<p class="muted">Kuis segera hadir.</p>`}</div>`;
+  }
+
+  const ex = best(`exam:${courseId}:${lvl.id}`);
+  return back("Semua tingkat") + `<div class="x-card"><h3>${lvl.title}</h3><p class="muted">${lvl.goal}</p></div>
+    <div class="x-card" style="margin-top:14px"><h3>Daftar bab</h3>
+      ${lvl.babs.map((b) => { const n = b.lessons.filter(isDone).length; return `<div class="x-row"><span>${b.id}. ${b.title}<br><small class="muted">${b.lessons.length ? n + "/" + b.lessons.length + " pelajaran" : "segera hadir"}</small></span><button class="x-btn x-ghost" data-n="bab:${b.id}">Buka</button></div>`; }).join("")}</div>
+    <div class="x-card" style="margin-top:14px"><h3>Ujian akhir tingkat</h3>
+      ${lvl.exam.length ? `<small class="muted">${lvl.exam.length} soal • lulus ${cur.passScore}%${ex != null ? " • skor terbaik " + ex + "%" : ""}</small><p><button class="x-btn" data-n="exam:${lvl.id}">Mulai ujian</button></p>` : `<p class="muted">Ujian segera hadir.</p>`}</div>`;
+};
+
+$("#pageContent").addEventListener("click", async (e) => {
+  const t = e.target;
+  if (t.dataset.course || t.dataset.back === "list") { nvReset(); go("courses"); return; }
+  const n = t.dataset.n;
+  if (!n || !courseId || !CURRICULUM[courseId]) return;
+  const cur = CURRICULUM[courseId];
+  const [act, id] = n.split(":");
+  if (act === "lv") nv.level = id;
+  else if (act === "bab") nv.bab = id;
+  else if (act === "ls") nv.lesson = id;
+  else if (act === "quiz") { nv.bab = id; nv.mode = "quiz"; nv.result = null; }
+  else if (act === "exam") { nv.level = id; nv.bab = null; nv.mode = "exam"; nv.result = null; }
+  else if (act === "retry") nv.result = null;
+  else if (act === "up") {
+    if (nv.mode) { nv.mode = null; nv.result = null; }
+    else if (nv.lesson) nv.lesson = null;
+    else if (nv.bab) nv.bab = null;
+    else nv.level = null;
+  } else if (act === "submit") {
+    const lv = cur.levels.find((l) => l.id === nv.level);
+    const b = lv.babs.find((x) => x.id === nv.bab);
+    const qs = nv.mode === "exam" ? lv.exam : b.quiz;
+    const ok = qs.map((q, i) => { const r = $(`input[name="nq${i}"]:checked`); return !!r && +r.value === q.a; });
+    const score = pct(ok.filter(Boolean).length, qs.length);
+    nv.result = { ok, score };
+    const k = nv.mode === "exam" ? `exam:${courseId}:${lv.id}` : `quiz:${courseId}:${b.id}`;
+    if (score > (progress[k] ?? -1)) await saveProgress(k, score);
+  }
+  go("courses");
 });
