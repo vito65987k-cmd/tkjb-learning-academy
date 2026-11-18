@@ -41,3 +41,26 @@ export const CURRICULUM = {
     ],
   },
 };
+
+import { B11, B12 } from "./net-1.js";
+import { B13, B14 } from "./net-1b.js";
+
+(() => {
+  const t1 = CURRICULUM.net.levels[0];
+  const [b11, b12, b13, b14] = t1.babs;
+  b11.lessons.push(...B11);
+  b12.lessons = B12.lessons;
+  b12.quiz = B12.quiz;
+  b13.lessons.push(...B13.add);
+  b13.quiz = B13.quiz;
+  b14.lessons = B14.lessons;
+  b14.quiz = B14.quiz;
+  t1.exam.push(
+    { q: "Alamat 192.168.0.5 termasuk jenis alamat…", o: ["Publik", "Privat", "Alamat MAC"], a: 1 },
+    { q: "Model TCP/IP versi umum memiliki berapa lapisan?", o: ["4", "7", "9"], a: 0 },
+    { q: "Perintah untuk menelusuri jalur data ke tujuan (Windows):", o: ["tracert", "format", "copy"], a: 0 },
+    { q: "Pin 1 pada standar T568B berwarna…", o: ["Putih-oranye", "Hijau", "Cokelat"], a: 0 },
+    { q: "1 byte sama dengan berapa bit?", o: ["4 bit", "8 bit", "16 bit"], a: 1 },
+    { q: "Langkah pertama troubleshooting yang paling sederhana adalah memeriksa…", o: ["Kabel dan lampu indikator port", "Isi harddisk", "Wallpaper komputer"], a: 0 }
+  );
+})();
