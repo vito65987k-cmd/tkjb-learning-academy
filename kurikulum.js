@@ -73,3 +73,9 @@ import { B22 } from "./net-2b.js";
   b21.lessons = B21.lessons;
   b21.quiz = B21.quiz;
 })();
+
+(() => {
+  const b22 = CURRICULUM.net.levels[1].babs[1];
+  b22.lessons = B22.lessons;
+  b22.quiz = B22.quiz;
+})();
