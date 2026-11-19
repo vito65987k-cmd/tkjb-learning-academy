@@ -65,3 +65,10 @@ import { B21 } from "./net-2.js";
     { q: "Langkah pertama troubleshooting yang paling sederhana adalah memeriksa…", o: ["Kabel dan lampu indikator port", "Isi harddisk", "Wallpaper komputer"], a: 0 }
   );
 })();
+
+(() => {
+  const t2 = CURRICULUM.net.levels[1];
+  const [b21] = t2.babs;
+  b21.lessons = B21.lessons;
+  b21.quiz = B21.quiz;
+})();
