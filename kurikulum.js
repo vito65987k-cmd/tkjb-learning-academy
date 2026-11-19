@@ -44,6 +44,7 @@ export const CURRICULUM = {
 
 import { B11, B12 } from "./net-1.js";
 import { B13, B14 } from "./net-1b.js";
+import { B21 } from "./net-2.js";
 
 (() => {
   const t1 = CURRICULUM.net.levels[0];
