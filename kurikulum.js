@@ -47,6 +47,7 @@ import { B13, B14 } from "./net-1b.js";
 import { B21 } from "./net-2.js";
 import { B22 } from "./net-2b.js";
 import { B23 } from "./net-2c.js";
+import { B24 } from "./net-2d.js";
 
 (() => {
   const t1 = CURRICULUM.net.levels[0];
