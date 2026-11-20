@@ -80,3 +80,9 @@ import { B23 } from "./net-2c.js";
   b22.lessons = B22.lessons;
   b22.quiz = B22.quiz;
 })();
+
+(() => {
+  const b23 = CURRICULUM.net.levels[1].babs[2];
+  b23.lessons = B23.lessons;
+  b23.quiz = B23.quiz;
+})();
