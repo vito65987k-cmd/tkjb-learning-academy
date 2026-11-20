@@ -87,3 +87,9 @@ import { B24 } from "./net-2d.js";
   b23.lessons = B23.lessons;
   b23.quiz = B23.quiz;
 })();
+
+(() => {
+  const b24 = CURRICULUM.net.levels[1].babs[3];
+  b24.lessons = B24.lessons;
+  b24.quiz = B24.quiz;
+})();
