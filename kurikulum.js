@@ -48,6 +48,7 @@ import { B21 } from "./net-2.js";
 import { B22 } from "./net-2b.js";
 import { B23 } from "./net-2c.js";
 import { B24 } from "./net-2d.js";
+import { EXAM2 } from "./net-2e.js";
 
 (() => {
   const t1 = CURRICULUM.net.levels[0];
@@ -92,4 +93,8 @@ import { B24 } from "./net-2d.js";
   const b24 = CURRICULUM.net.levels[1].babs[3];
   b24.lessons = B24.lessons;
   b24.quiz = B24.quiz;
+})();
+
+(() => {
+  CURRICULUM.net.levels[1].exam.push(...EXAM2);
 })();
