@@ -107,3 +107,9 @@ import { B32 } from "./net-3b.js";
   b31.lessons = B31.lessons;
   b31.quiz = B31.quiz;
 })();
+
+(() => {
+  const b32 = CURRICULUM.net.levels[2].babs[1];
+  b32.lessons = B32.lessons;
+  b32.quiz = B32.quiz;
+})();
