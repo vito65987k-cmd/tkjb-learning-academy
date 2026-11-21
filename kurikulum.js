@@ -50,6 +50,7 @@ import { B23 } from "./net-2c.js";
 import { B24 } from "./net-2d.js";
 import { EXAM2 } from "./net-2e.js";
 import { B31 } from "./net-3.js";
+import { B32 } from "./net-3b.js";
 
 
 (() => {
