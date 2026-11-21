@@ -100,3 +100,9 @@ import { B31 } from "./net-3.js";
 (() => {
   CURRICULUM.net.levels[1].exam.push(...EXAM2);
 })();
+
+(() => {
+  const b31 = CURRICULUM.net.levels[2].babs[0];
+  b31.lessons = B31.lessons;
+  b31.quiz = B31.quiz;
+})();
