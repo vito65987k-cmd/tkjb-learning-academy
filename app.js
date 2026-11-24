@@ -27,6 +27,7 @@ if (!demo) {
   } catch (e) { console.error("Supabase gagal dimuat", e); }
 }
 const useDb = !!sb;
+console.log("Supabase aktif:", useDb);
 
 // ---------- Data materi (edit sesuai kebutuhan) ----------
 const SCHEDULE = [
