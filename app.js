@@ -17,6 +17,14 @@ function toast(msg) {
   setTimeout(() => d.remove(), 4000);
 }
 
+// ---------- Pemulihan password: baca alamat SEBELUM klien Supabase dibuat ----------
+const REDIRECT_URL = "https://vito65987k-cmd.github.io/tkjb-learning-academy/";
+const hashParams = new URLSearchParams(location.hash.replace(/^#/, ""));
+let recovery = hashParams.get("type") === "recovery";
+const linkError = !!hashParams.get("error");
+let forgotLink = null;
+let recOverlay = null;
+let recUserId = null;
 // ---------- Supabase (atau mode demo) ----------
 const demo = !SUPABASE_URL || !SUPABASE_ANON_KEY || SUPABASE_URL.includes("ISI_");
 let sb = null;
