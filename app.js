@@ -158,6 +158,7 @@ function setMode(m) {
   $("#authSubtitle").textContent = reg ? "Daftar untuk mulai belajar." : "Masuk untuk melanjutkan perjalanan belajarmu.";
   $("#authSubmit").innerHTML = reg ? "Daftar sekarang <span>→</span>" : "Masuk ke dashboard <span>→</span>";
   $("#password").autocomplete = reg ? "new-password" : "current-password";
+ forgotLink?.classList.toggle("hidden", reg);
   setMsg("");
 }
 async function handleAuth(e) {
