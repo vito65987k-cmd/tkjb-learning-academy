@@ -314,6 +314,165 @@ $("#pageContent").addEventListener("change", async (e) => {
   if (k) { await saveProgress(`lesson:${k}`, e.target.checked); go("courses"); }
 });
 
+// ---------- Pemulihan password: tampilan dan aksi ----------
+const recStyle = document.createElement("style");
+recStyle.textContent = `
+.rec-overlay{position:fixed;inset:0;z-index:100;background:#071326;display:flex;align-items:center;justify-content:center;padding:16px;overflow:auto}
+.rec-overlay .x-card{width:100%;max-width:420px}
+.rec-overlay label{display:block;margin:12px 0 4px}
+.rec-overlay input{width:100%;box-sizing:border-box;padding:10px;border-radius:12px;font:inherit}
+.rec-row{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.rec-msg{min-height:1.4em;margin-top:12px}
+`;
+document.head.appendChild(recStyle);
+
+function cleanUrl() {
+  if (location.hash) history.replaceState(null, "", location.pathname + location.search);
+}
+function setRecMsg(t, ok = false) {
+  const m = $("#recMessage");
+  if (!m) return;
+  m.textContent = t;
+  m.style.color = ok ? "#4ade80" : "#f87171";
+}
+function recoveryError(err) {
+  const m = String((err && err.message) || "");
+  if (/same|different/i.test(m)) return "Password baru harus berbeda dari password lama.";
+  if (/session/i.test(m)) return "Sesi pemulihan sudah habis. Minta tautan baru lewat 'Lupa password?'.";
+  if (/at least|weak|short/i.test(m)) return "Password terlalu lemah atau terlalu pendek. Coba yang lebih panjang.";
+  return "Gagal menyimpan password: " + m;
+}
+function resetToLogin(msg, ok = false) {
+  user = null; notes = []; progress = {};
+  $("#appView").classList.add("hidden");
+  $("#authView").classList.remove("hidden");
+  $("#authForm").reset();
+  setMode("login");
+  if (msg) setMsg(msg, ok);
+}
+function showRecoveryForm(session) {
+  recovery = true;
+  cleanUrl();
+  const sid = (session && session.user && session.user.id) || null;
+  if (recOverlay) {
+    // formulir sudah terbuka: ikuti sesi recovery terbaru jika akunnya berbeda
+    if (sid && sid !== recUserId) {
+      recUserId = sid;
+      setRecMsg("Tautan pemulihan terbaru terdeteksi. Formulir ini sekarang untuk akun pada tautan terbaru.", true);
+    }
+    return;
+  }
+  recUserId = sid;
+  recOverlay = document.createElement("div");
+  recOverlay.className = "rec-overlay";
+  recOverlay.innerHTML = `
+    <form class="x-card" id="recForm" novalidate>
+      <h3>Buat password baru</h3>
+      <p class="muted small">Masukkan password baru untuk akunmu.</p>
+      <label for="recPass">Password baru</label>
+      <input id="recPass" type="password" autocomplete="new-password">
+      <label for="recPass2">Ulangi password baru</label>
+      <input id="recPass2" type="password" autocomplete="new-password">
+      <div class="rec-msg" id="recMessage" role="alert"></div>
+      <div class="rec-row">
+        <button class="x-btn" id="recSave" type="submit">Simpan password baru</button>
+        <button class="x-btn x-ghost" id="recCancel" type="button">Batal</button>
+      </div>
+    </form>`;
+  document.body.appendChild(recOverlay);
+  $("#recForm").addEventListener("submit", saveNewPassword);
+  $("#recCancel").addEventListener("click", cancelRecovery);
+  $("#recPass").focus();
+}
+function closeRecoveryForm() {
+  if (recOverlay) recOverlay.remove();
+  recOverlay = null;
+  recUserId = null;
+  recovery = false;
+}
+async function recoverySessionIsCurrent() {
+  const { data } = await sb.auth.getSession();
+  return !!(data.session && recUserId && data.session.user.id === recUserId);
+}
+async function saveNewPassword(e) {
+  e.preventDefault();
+  const p1 = $("#recPass").value;
+  const p2 = $("#recPass2").value;
+  if (p1.length < 8) return setRecMsg("Password minimal 8 karakter.");
+  if (p1 !== p2) return setRecMsg("Konfirmasi password tidak sama.");
+  const btn = $("#recSave");
+  btn.disabled = true;
+  setRecMsg("Menyimpan…", true);
+  try {
+    if (!(await recoverySessionIsCurrent())) {
+      setRecMsg("Sesi pemulihan sudah berubah atau habis. Tekan Batal, lalu minta tautan baru lewat 'Lupa password?'.");
+      btn.disabled = false;
+      return;
+    }
+    const { data, error } = await sb.auth.updateUser({ password: p1 });
+    if (error) throw error;
+    if (data && data.user && recUserId && data.user.id !== recUserId) {
+      // sesi berubah tepat di antara pemeriksaan dan penyimpanan: jangan tutup sesi yang sedang aktif
+      setRecMsg("Perhatian: sesi berubah saat menyimpan, sehingga password berlaku untuk akun yang sedang aktif di browser ini, bukan akun pemulihan. Tekan Batal, lalu periksa akunmu.");
+      return;
+    }
+    try { await sb.auth.signOut({ scope: "local" }); } catch (e2) { console.error(e2); }
+    closeRecoveryForm();
+    resetToLogin("Password berhasil diganti. Silakan masuk dengan password baru.", true);
+  } catch (err) {
+    console.error(err);
+    setRecMsg(recoveryError(err));
+    btn.disabled = false;
+  }
+}
+async function cancelRecovery() {
+  if (!recOverlay) return;
+  try {
+    if (await recoverySessionIsCurrent()) {
+      await sb.auth.signOut({ scope: "local" });
+      closeRecoveryForm();
+      resetToLogin("Pemulihan password dibatalkan.", true);
+    } else {
+      closeRecoveryForm();
+      location.replace(location.pathname + location.search);
+    }
+  } catch (err) {
+    console.error(err);
+    setRecMsg("Gagal membatalkan. Periksa koneksi, lalu coba lagi.");
+  }
+}
+async function sendReset() {
+  const email = $("#email").value.trim();
+  if (!email) { setMsg("Isi email dulu, lalu tekan 'Lupa password?'."); return $("#email").focus(); }
+  setMsg("Mengirim tautan pemulihan…", true);
+  try {
+    const { error } = await sb.auth.resetPasswordForEmail(email, { redirectTo: REDIRECT_URL });
+    if (error) throw error;
+    setMsg("Jika email terdaftar, tautan pemulihan sudah dikirim. Cek kotak masuk dan folder spam.", true);
+  } catch (err) {
+    console.error(err);
+    setMsg("Gagal mengirim tautan: " + (err.message || "coba lagi nanti."));
+  }
+}
+if (useDb) {
+  sb.auth.onAuthStateChange((event, session) => {
+    if (event === "PASSWORD_RECOVERY") showRecoveryForm(session);
+  });
+  const submitBtn = $("#authSubmit");
+  if (submitBtn) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = "Lupa password?";
+    btn.style.cssText = "background:none;border:0;padding:0;color:#38bdf8;cursor:pointer;text-decoration:underline;font:inherit";
+    forgotLink = document.createElement("div");
+    forgotLink.style.marginTop = "12px";
+    forgotLink.classList.toggle("hidden", mode === "register");
+    forgotLink.appendChild(btn);
+    submitBtn.insertAdjacentElement("afterend", forgotLink);
+    btn.addEventListener("click", sendReset);
+  }
+  }
+
 // ---------- Mulai: cek sesi yang sudah ada ----------
 (async () => {
   try {
