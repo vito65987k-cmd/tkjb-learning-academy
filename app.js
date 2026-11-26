@@ -478,7 +478,18 @@ if (useDb) {
   try {
     if (useDb) {
       const { data } = await sb.auth.getSession();
-      if (data.session) await enter(data.session.user);
+      if (linkError) {
+        cleanUrl();
+        toast("Tautan pemulihan tidak valid atau sudah kedaluwarsa. Minta tautan baru lewat 'Lupa password?'.");
+      }
+      if (recovery) {
+        cleanUrl();
+        if (data.session) showRecoveryForm(data.session);
+        else { recovery = false; setMsg("Sesi pemulihan tidak ditemukan. Minta tautan baru lewat 'Lupa password?'."); }
+      } else if (data.session) {
+        await new Promise((r) => setTimeout(r, 0));
+        if (!recOverlay) await enter(data.session.user);
+      }
     } else {
       const email = store.get("tkjb_demo_session", null);
       const u = email && store.get("tkjb_demo_users", {})[email];
