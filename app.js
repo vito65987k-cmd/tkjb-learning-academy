@@ -59,7 +59,28 @@ const QUIZ = [
   { q: "Password yang paling aman:", o: ["12345678", "namaku2010", "Kombinasi panjang, huruf, angka & simbol"], a: 2 },
   { q: "Jumlah layer pada model OSI:", o: ["4", "7", "5"], a: 1 },
 ];
-const allLessons = COURSES.flatMap((c) => c.lessons.map((_, i) => `${c.id}:${i}`));
+// ---------- Penghitung materi Dashboard (Kurikulum aktif) ----------
+const allLessons = [...new Set(
+  COURSES.flatMap((c) => {
+    const curriculum = CURRICULUM[c.id];
+
+    // Jika kelas belum memakai kurikulum baru,
+    // tetap gunakan daftar materi lama.
+    if (!curriculum) {
+      return c.lessons.map((_, i) => `${c.id}:${i}`);
+    }
+
+    // Ambil seluruh materi dari tingkat, bab, dan pelajaran.
+    // ID legacy tetap dipakai agar progres lama terbaca.
+    return curriculum.levels.flatMap((level) =>
+      level.babs.flatMap((bab) =>
+        bab.lessons.map((lesson) =>
+          `${c.id}:${lesson.legacy !== undefined ? lesson.legacy : lesson.id}`
+        )
+      )
+    );
+  })
+)];
 
 // ---------- State ----------
 let user = null;
